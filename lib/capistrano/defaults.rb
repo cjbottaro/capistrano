@@ -2,6 +2,7 @@ set_if_empty :scm, :git
 set_if_empty :branch, :master
 set_if_empty :deploy_to, -> { "/var/www/#{fetch(:application)}" }
 set_if_empty :tmp_dir, "/tmp"
+set_if_empty :deploy_roles, :all
 
 set_if_empty :default_env, {}
 set_if_empty :keep_releases, 5

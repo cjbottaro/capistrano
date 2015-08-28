@@ -13,7 +13,7 @@ namespace :git do
 
   desc 'Upload the git wrapper script, this script guarantees that we can script git without getting an interactive prompt'
   task :wrapper do
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       execute :mkdir, "-p", "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
       upload! StringIO.new("#!/bin/sh -e\nexec /usr/bin/ssh -o PasswordAuthentication=no -o StrictHostKeyChecking=no \"$@\"\n"), "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
       execute :chmod, "+x", "#{fetch(:tmp_dir)}/#{fetch(:application)}/git-ssh.sh"
@@ -23,7 +23,7 @@ namespace :git do
   desc 'Check that the repository is reachable'
   task check: :'git:wrapper' do
     fetch(:branch)
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       with fetch(:git_environmental_variables) do
         strategy.check
       end
@@ -32,7 +32,7 @@ namespace :git do
 
   desc 'Clone the repo to the cache'
   task clone: :'git:wrapper' do
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       if strategy.test
         info t(:mirror_exists, at: repo_path)
       else
@@ -47,7 +47,7 @@ namespace :git do
 
   desc 'Update the repo mirror to reflect the origin state'
   task update: :'git:clone' do
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       within repo_path do
         with fetch(:git_environmental_variables) do
           strategy.update
@@ -58,7 +58,7 @@ namespace :git do
 
   desc 'Copy repo to releases'
   task create_release: :'git:update' do
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       with fetch(:git_environmental_variables) do
         within repo_path do
           execute :mkdir, '-p', release_path
@@ -70,7 +70,7 @@ namespace :git do
 
   desc 'Determine the revision that will be deployed'
   task :set_current_revision do
-    on release_roles :all do
+    on release_roles fetch(:deploy_roles) do
       within repo_path do
         with fetch(:git_environmental_variables) do
           set :current_revision, strategy.fetch_revision
